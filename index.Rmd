@@ -1,0 +1,161 @@
+---
+title: "Project Alpro KlsC G"
+author: "Nuriyah Yoga Utami (M0725016), Nurkhafizh Tri Saputra (M0725076), Zharfa Lila Virnita Putri (M0725078)"
+date: "2025-12-31"
+output: html_document
+---
+KASUS 1 (ANALISIS NILAI MAHASISWA DENGAN DATA ACAK DAN VALIDASI)
+Tingkat Kesulitan : Mudah
+Deskripsi Masalah :
+
+  Dalam praktik pengolahan nilai akademik, data yang diterima sering kali berjumlah besar dan mengandung nilai yang tidak valid, seperti nilai di luar rentang penilaian yang ditetapkan. Jika data tersebut tidak disaring terlebih dahulu, hasil analisis dapat menjadi tidak akurat.
+
+  Studi kasus ini membahas bagaimana membangkitkan data nilai ujian secara acak, melakukan validasi nilai sesuai rentang 0–100, serta menghitung informasi statistik sederhana seperti rata-rata nilai valid dan jumlah nilai di atas rata-rata. Permasalahan ini menekankan pemahaman alur pengolahan data dan penggunaan fungsi dasar R dalam analisis data.
+
+1. Membangkitkan nilai ujian acak (bil. bulat dari -20 s.d. 120)
+```{r}
+set.seed(1)
+
+nilai <- sample(-20:100, size = 100, replace = TRUE)
+nilai
+```
+
+2. Menyaring nilai valid (0-100)
+```{r}
+nilai_valid <- nilai[nilai >= 0 & nilai <= 100]
+nilai_valid
+```
+
+3. Menghitung nilai rata-rata nilai valid
+```{r}
+rata_rata <- mean(nilai_valid)
+rata_rata
+```
+4. Menghitung jumlah nilai di atas rata-rata
+```{r}
+jumlah_di_atas_rata <- sum(nilai_valid > rata_rata)
+jumlah_di_atas_rata
+```
+5. Menampilkan 10 nilai valid pertama
+```{r}
+memunculkan <- nilai_valid[1:10]
+memunculkan
+```
+
+KASUS 2 (EVALUASI KELULUSAN MAHASISWA DENGAN DATA NILAI ACAK)
+Tingkat Kesulitan : Sedang
+Deskripsi Masalah :
+
+Pada kelas besar, dosen harus mengolah nilai puluhan hingga ratusan mahasiswa. Oleh karena itu, program harus mampu menangani data frame besar, menghitung nilai akhir, serta menyajikan hasil secara ringkas dan informatif. Buatlah program R dengan syarat :
+1. Data ada 100 Mahasiswa
+2. Nilai Tugas, Nilai UTS, dan Nilai UAS (0-100) secara acak
+3. Menghitung Nilai Akhir : 30%  Nilai Tugas + 30% Nilai UTS + 40% Nilai UAS
+4. Menentukan: 
+-Status : Lulus jika Nilai akhir lebih dari sama dengan 60 dan Tidak Lulus jika Nilai Akhir kurang dari 60
+-Grade : A dengan Nilai Akhir 85-100, B dengan Nilai Akhir 70-84, C dengan Nilai Akhir 60-69, dan D dengan Nilai Akhir kurang dari 60
+5. Tampilkan 10 baris pertama output
+
+```{r}
+Evaluasi_Kelulusan <- function(jumlah_mahasiswa = 100) {
+  
+  set.seed(100)
+  
+  df <- data.frame(
+    Nama  = paste("Mahasiswa", 1:jumlah_mahasiswa),
+    Nilai_Tugas = runif(jumlah_mahasiswa, 0, 100),
+    Nilai_UTS   = runif(jumlah_mahasiswa, 0, 100),
+    Nilai_UAS   = runif(jumlah_mahasiswa, 0, 100)
+  )
+  
+  df$Nilai_Akhir <- 0.3 * df$Nilai_Tugas +
+    0.3 * df$Nilai_UTS +
+    0.4 * df$Nilai_UAS
+  
+  for (i in 1:nrow(df)) {
+    
+    if (df$Nilai_Akhir[i] >= 60) {
+      df$Status[i] <- "Lulus"
+    } else {
+      df$Status[i] <- "Tidak Lulus"
+    }
+    
+    if (df$Nilai_Akhir[i] >= 85) {
+      df$Grade[i] <- "A"
+    } else if (df$Nilai_Akhir[i] >= 70) {
+      df$Grade[i] <- "B"
+    } else if (df$Nilai_Akhir[i] >= 60) {
+      df$Grade[i] <- "C"
+    } else {
+      df$Grade[i] <- "D"
+    }
+  }
+  
+  return(df)
+}
+
+output <- Evaluasi_Kelulusan()
+head(output, 10)
+```
+
+KASUS 3 (ANALISIS KINERJA PRODUK DARI 100 TRANSAKSI DENGAN DATA ACAK)
+Tingkat Kesulitan : Sulit
+Deskripsi Masalah : 
+
+Dalam analitik bisnis, data transaksi biasanya besar dan acak. Analisis yang baik harus:
+- Reproducible
+- Mampu menyaring data ekstrem
+- Menghasilkan ringkasan per kelompok (produk)
+Studi kasus ini menyerupai mini data analysis project.
+
+Buatlah program R untuk:
+- Membangkitkan 100 data transaksi
+- Produk terdiri dari 5 jenis (A–E)
+- Hitung nilai transaksi per baris
+- Abaikan transaksi anomali (nilai transaksi > 3 × rata-rata transaksi)
+- Hitung per produk:
+    ◦ Total penjualan
+    ◦ Rata-rata transaksi
+    ◦ Jumlah transaksi valid
+- Tentukan kategori performa produk
+- Tampilkan 10 baris pertama data transaksi valid dan seluruh ringkasan produk
+
+```{r}
+set.seed(123)
+
+n <- 100
+
+data <- data.frame(
+  Produk = sample(c("A", "B", "C", "D", "E"), n, replace = TRUE),
+  Harga  = sample(10000:50000, n, replace = TRUE),
+  Jumlah = sample(1:10, n, replace = TRUE)
+)
+
+data$Nilai_Transaksi <- data$Harga * data$Jumlah
+
+rata_rata <- mean(data$Nilai_Transaksi)
+
+data_valid <- subset(data, Nilai_Transaksi <= 3 * rata_rata)
+
+ringkasan <- aggregate(
+  Nilai_Transaksi ~ Produk,
+  data_valid,
+  function(x) c(
+    Total = sum(x),
+    Rata_rata = mean(x),
+    Jumlah_Transaksi = length(x)
+  )
+)
+
+ringkasan <- do.call(data.frame, ringkasan)
+
+ringkasan$Kategori <- ifelse(
+  ringkasan$Nilai_Transaksi.Total >= mean(ringkasan$Nilai_Transaksi.Total),
+  "Baik",
+  "Kurang"
+)
+
+head(data_valid, 10)
+
+ringkasan
+
+```
